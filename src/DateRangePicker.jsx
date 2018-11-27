@@ -529,13 +529,17 @@ const DateRangePicker = createClass({
   render: function() {
     let {paginationArrowComponent: PaginationArrowComponent, className, numberOfCalendars, stateDefinitions, selectedLabel, showLegend, helpMessage} = this.props;
 
-    let calendars = Immutable.Range(0, numberOfCalendars).map(this.renderCalendar);
+    let calendars = Immutable.Range(-1, numberOfCalendars+1).map(this.renderCalendar);
     className = this.cx({element: null}) + ' ' + className;
 
     return (
       <div className={className.trim()}>
         <PaginationArrowComponent direction="previous" onTrigger={this.moveBack} disabled={!this.canMoveBack()} />
-        {calendars.toJS()}
+        <div className={this.cx({element: 'MonthWrapper'})}>
+          <div className={this.cx({element: 'MonthInnerWrapper'})}>
+              {calendars.toJS()}
+          </div>
+        </div>
         <PaginationArrowComponent direction="next" onTrigger={this.moveForward} disabled={!this.canMoveForward()} />
         {helpMessage ? <span className={this.cx({element: 'HelpMessage'})}>{helpMessage}</span> : null}
         {showLegend ? <Legend stateDefinitions={stateDefinitions} selectedLabel={selectedLabel} /> : null}

@@ -26,6 +26,11 @@ const absoluteMaximum = moment(new Date(8640000000000000 / 2)).startOf('day');
 
 function noop() {}
 
+const DIRECTIONS = {
+  next: 'next',
+  previous: 'previous',
+};
+
 const DateRangePicker = createClass({
   mixins: [BemMixin, PureRenderMixin],
   displayName: "DateRangePicker",
@@ -59,6 +64,8 @@ const DateRangePicker = createClass({
     showLegend: PropTypes.bool,
     stateDefinitions: PropTypes.object,
     value: CustomPropTypes.momentOrMomentRange,
+    animate: PropTypes.bool,
+    duration: PropTypes.number,
   },
 
   getDefaultProps() {
@@ -92,6 +99,8 @@ const DateRangePicker = createClass({
       showLegend: false,
       onSelect: noop,
       paginationArrowComponent: PaginationArrow,
+      animate: true,
+      duration: 500,
     };
   },
 
@@ -144,6 +153,7 @@ const DateRangePicker = createClass({
       hideSelection: false,
       enabledRange: this.getEnabledRange(this.props),
       dateStates: this.getDateStates(this.props),
+      direction: '',
     };
   },
 
@@ -402,7 +412,8 @@ const DateRangePicker = createClass({
     if (this.canMoveBack()) {
       monthDate = this.getMonthDate();
       monthDate.subtract(1, 'months');
-      this.setState(getYearMonth(monthDate));
+
+      this.animate(DIRECTIONS.previous, monthDate);
     }
   },
 
@@ -419,6 +430,26 @@ const DateRangePicker = createClass({
     if (this.canMoveForward()) {
       monthDate = this.getMonthDate();
       monthDate.add(1, 'months');
+
+      this.animate(DIRECTIONS.next, monthDate);
+    }
+  },
+
+  animate(direction, monthDate) {
+    const { animate, duration } = this.props;
+
+    if (animate) {
+      this.setState({
+        direction: direction,
+      });
+
+      setTimeout(() => {
+        this.setState({
+          ...getYearMonth(monthDate),
+          direction: '',
+        });
+      }, duration);
+    } else {
       this.setState(getYearMonth(monthDate));
     }
   },
@@ -526,19 +557,65 @@ const DateRangePicker = createClass({
     return <CalendarMonth {...props} />;
   },
 
-  render: function() {
-    let {paginationArrowComponent: PaginationArrowComponent, className, numberOfCalendars, stateDefinitions, selectedLabel, showLegend, helpMessage} = this.props;
+  getStyle() {
+    let { direction } = this.state;
+    let { animate } = this.props;
 
-    let calendars = Immutable.Range(0, numberOfCalendars).map(this.renderCalendar);
-    className = this.cx({element: null}) + ' ' + className;
+    if (!direction || !animate) {
+      return null;
+    }
+
+    const { numberOfCalendars, duration } = this.props;
+
+    let style;
+
+    switch (direction) {
+      case DIRECTIONS.next: {
+        style = {
+          transition: `transform ${duration}ms`,
+          transform: `translateX(-${100 / numberOfCalendars}%)`,
+        };
+        break;
+      }
+      case DIRECTIONS.previous: {
+        style = {
+          transition: `transform ${duration}ms`,
+          transform: `translateX(${100 / numberOfCalendars}%)`,
+        };
+        break;
+      }
+    }
+
+    return style;
+  },
+
+  render: function () {
+    let {
+      paginationArrowComponent: PaginationArrowComponent,
+      className,
+      numberOfCalendars,
+      stateDefinitions,
+      selectedLabel,
+      showLegend,
+      helpMessage,
+    } = this.props;
+
+    let wrapperStyle = this.getStyle();
+
+    let calendars = Immutable.Range(-1, numberOfCalendars + 1).map(this.renderCalendar);
+    className = this.cx({ element: null }) + ' ' + className;
 
     return (
       <div className={className.trim()}>
-        <PaginationArrowComponent direction="previous" onTrigger={this.moveBack} disabled={!this.canMoveBack()} />
-        {calendars.toJS()}
-        <PaginationArrowComponent direction="next" onTrigger={this.moveForward} disabled={!this.canMoveForward()} />
-        {helpMessage ? <span className={this.cx({element: 'HelpMessage'})}>{helpMessage}</span> : null}
-        {showLegend ? <Legend stateDefinitions={stateDefinitions} selectedLabel={selectedLabel} /> : null}
+        <PaginationArrowComponent direction="previous" onTrigger={this.moveBack} disabled={!this.canMoveBack()}/>
+          <div className={this.cx({ element: 'MonthWrapper' })}>
+            <div className={this.cx({ element: 'MonthInnerWrapper' })} style={wrapperStyle}>
+              {calendars.toJS()}
+            </div>
+          </div>
+        <PaginationArrowComponent direction="next" onTrigger={this.moveForward} disabled={!this.canMoveForward()}/>
+        {helpMessage ? <span className={this.cx({ element: 'HelpMessage' })}>{helpMessage}</span> : null}
+        {showLegend ? <Legend stateDefinitions={stateDefinitions} selectedLabel={selectedLabel}/> : null}
       </div>
     );
   },

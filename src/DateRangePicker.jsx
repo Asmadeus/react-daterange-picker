@@ -66,6 +66,7 @@ const DateRangePicker = createClass({
     value: CustomPropTypes.momentOrMomentRange,
     animate: PropTypes.bool,
     duration: PropTypes.number,
+    focusedElement: PropTypes.oneOf(['start', 'end']),
   },
 
   getDefaultProps() {
@@ -552,6 +553,7 @@ const DateRangePicker = createClass({
       dateRangesForDate: this.dateRangesForDate,
       dateComponent: CalendarDate,
       locale: this.props.locale,
+      focusedElement: this.props.focusedElement,
     };
 
     return <CalendarMonth {...props} />;

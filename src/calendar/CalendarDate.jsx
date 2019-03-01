@@ -42,6 +42,7 @@ const CalendarDate = createClass({
     onHighlightDate: PropTypes.func,
     onUnHighlightDate: PropTypes.func,
     onSelectDate: PropTypes.func,
+    focusedElement: PropTypes.oneOf(['start', 'end']),
   },
 
   getInitialState() {
@@ -163,6 +164,7 @@ const CalendarDate = createClass({
       isHighlightedRangeStart,
       isHighlightedRangeEnd,
       isInHighlightedRange,
+      focusedElement,
     } = this.props;
 
     let bemModifiers = this.getBemModifiers();
@@ -179,14 +181,17 @@ const CalendarDate = createClass({
 
     let highlightModifier;
     let selectionModifier;
+    let focused;
 
     if (isSelectedDate || (isSelectedRangeStart && isSelectedRangeEnd)
         || (isHighlightedRangeStart && isHighlightedRangeEnd)) {
       selectionModifier = 'single';
     } else if (isSelectedRangeStart || isHighlightedRangeStart) {
       selectionModifier = 'start';
+      focused = focusedElement === 'start';
     } else if (isSelectedRangeEnd || isHighlightedRangeEnd) {
       selectionModifier = 'end';
+      focused = focusedElement === 'end';
     } else if (isInSelectedRange || isInHighlightedRange) {
       selectionModifier = 'segment';
     }
@@ -236,7 +241,7 @@ const CalendarDate = createClass({
           </div>}
         {numStates === 1 &&
           <div className={this.cx({element: "FullDateStates"})} style={style} />}
-        {selectionModifier ? <CalendarSelection modifier={selectionModifier} pending={pending} /> : null}
+        {selectionModifier ? <CalendarSelection modifier={selectionModifier} focused={focused} pending={pending} /> : null}
         <span className={this.cx({ element: "DateLabel" })}>{date.format('D')}</span>
         {highlightModifier ? <CalendarHighlight modifier={highlightModifier} /> : null}
       </td>

@@ -65,6 +65,7 @@ const DateRangePicker = createClass({
     stateDefinitions: PropTypes.object,
     value: CustomPropTypes.momentOrMomentRange,
     animate: PropTypes.bool,
+    animationAxis: PropTypes.oneOf(['X', 'Y']),
     duration: PropTypes.number,
     focusedElement: PropTypes.oneOf(['start', 'end']),
   },
@@ -101,6 +102,7 @@ const DateRangePicker = createClass({
       onSelect: noop,
       paginationArrowComponent: PaginationArrow,
       animate: true,
+      animationAxis: 'X',
       duration: 500,
     };
   },
@@ -567,7 +569,7 @@ const DateRangePicker = createClass({
       return null;
     }
 
-    const { numberOfCalendars, duration } = this.props;
+    const { numberOfCalendars, duration, animationAxis } = this.props;
 
     let style;
 
@@ -575,14 +577,14 @@ const DateRangePicker = createClass({
       case DIRECTIONS.next: {
         style = {
           transition: `transform ${duration}ms`,
-          transform: `translateX(-${100 / numberOfCalendars}%)`,
+          transform: `translate${animationAxis}(-${100 / numberOfCalendars}%)`,
         };
         break;
       }
       case DIRECTIONS.previous: {
         style = {
           transition: `transform ${duration}ms`,
-          transform: `translateX(${100 / numberOfCalendars}%)`,
+          transform: `translate${animationAxis}(${100 / numberOfCalendars}%)`,
         };
         break;
       }

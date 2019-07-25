@@ -9,7 +9,8 @@
     "test": "gulp test-coverage",
     "lint": "gulp lint",
     "deploy-example": "gulp deploy-example",
-    "prepare": "gulp build-dist"
+    "prepare": "gulp build-dist",
+    "postinstall": "gulp build-dist"
   },
   "style": "./dist/css/react-calendar.css",
   "files": [

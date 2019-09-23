@@ -116,13 +116,14 @@ const DateRangePicker = createClass({
     const startDateValue = isMomentRange(value) ? value.start : value;
     const endDateValue = isMomentRange(value) ? value.end : value;
 
-
     const updatedState = {
       selectedStartDate: null,
       hideSelection: false,
       dateStates: this.state.dateStates && Immutable.is(this.state.dateStates, nextDateStates) ? this.state.dateStates : nextDateStates,
       enabledRange: this.state.enabledRange && this.state.enabledRange.isSame(nextEnabledRange) ? this.state.enabledRange : nextEnabledRange,
     };
+
+    const diff = endDateValue.clone().startOf('M').diff(startDateValue.clone().startOf('M'), 'M');
 
     if (hasUpdatedValue(this.props, nextProps)) {
       if (!nextProps.value || !this.isStartOrEndVisible(nextProps)) {
@@ -143,9 +144,8 @@ const DateRangePicker = createClass({
       updatedState.month = +momentDate.format('M');
     }
 
-    if (moment(endDateValue).diff(startDateValue, 'M') >= numberOfCalendars) {
-      updatedState.year = +moment(startDateValue).format('YYYY');
-      updatedState.month = +moment(startDateValue).format('M') - 1;
+    if (diff >= numberOfCalendars) {
+      updatedState.month = +endDateValue.clone().subtract(numberOfCalendars, 'M').format('M');
     }
 
     this.setState(updatedState);

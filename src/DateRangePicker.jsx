@@ -112,8 +112,10 @@ const DateRangePicker = createClass({
     const maxDate = new Date(maximumDate);
     const nextDateStates = this.getDateStates(nextProps);
     const nextEnabledRange = this.getEnabledRange(nextProps);
-    let { value } = nextProps;
-    value = isMomentRange(value) ? value.start : value;
+    const { value } = nextProps;
+    const startDateValue = isMomentRange(value) ? value.start : value;
+    const endDateValue = isMomentRange(value) ? value.end : value;
+
 
     const updatedState = {
       selectedStartDate: null,
@@ -133,12 +135,17 @@ const DateRangePicker = createClass({
 
     if (numberOfCalendars > 1
       && maxDate
-      && maxDate.getFullYear() === +value.format('YYYY')
-      && maxDate.getMonth() === (+value.format('M') - 1)) {
+      && maxDate.getFullYear() === +endDateValue.format('YYYY')
+      && maxDate.getMonth() === (+endDateValue.format('M') - 1)) {
       const momentDate = moment(maxDate)
         .subtract(numberOfCalendars, 'month');
       updatedState.year = +momentDate.format('YYYY');
       updatedState.month = +momentDate.format('M');
+    }
+
+    if (moment(endDateValue).diff(startDateValue, 'M') >= numberOfCalendars) {
+      updatedState.year = +moment(startDateValue).format('YYYY');
+      updatedState.month = +moment(startDateValue).format('M') - 1;
     }
 
     this.setState(updatedState);

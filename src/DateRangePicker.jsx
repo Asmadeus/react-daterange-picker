@@ -123,8 +123,6 @@ const DateRangePicker = createClass({
       enabledRange: this.state.enabledRange && this.state.enabledRange.isSame(nextEnabledRange) ? this.state.enabledRange : nextEnabledRange,
     };
 
-    const diff = endDateValue.clone().startOf('M').diff(startDateValue.clone().startOf('M'), 'M');
-
     if (hasUpdatedValue(this.props, nextProps)) {
       if (!nextProps.value || !this.isStartOrEndVisible(nextProps)) {
         const yearMonth = getYearMonthProps(nextProps);
@@ -134,18 +132,22 @@ const DateRangePicker = createClass({
       }
     }
 
-    if (numberOfCalendars > 1
-      && maxDate
-      && maxDate.getFullYear() === +endDateValue.format('YYYY')
-      && maxDate.getMonth() === (+endDateValue.format('M') - 1)) {
-      const momentDate = moment(maxDate)
-        .subtract(numberOfCalendars, 'month');
-      updatedState.year = +momentDate.format('YYYY');
-      updatedState.month = +momentDate.format('M');
-    }
+    if (endDateValue) {
+      const diff = endDateValue.clone().startOf('M').diff(startDateValue.clone().startOf('M'), 'M');
 
-    if (diff >= numberOfCalendars) {
-      updatedState.month = +endDateValue.clone().subtract(numberOfCalendars, 'M').format('M');
+      if (numberOfCalendars > 1
+        && maxDate
+        && maxDate.getFullYear() === +endDateValue.format('YYYY')
+        && maxDate.getMonth() === (+endDateValue.format('M') - 1)) {
+        const momentDate = moment(maxDate)
+          .subtract(numberOfCalendars, 'month');
+        updatedState.year = +momentDate.format('YYYY');
+        updatedState.month = +momentDate.format('M');
+      }
+
+      if (diff >= numberOfCalendars) {
+        updatedState.month = +endDateValue.clone().subtract(numberOfCalendars, 'M').format('M');
+      }
     }
 
     this.setState(updatedState);
